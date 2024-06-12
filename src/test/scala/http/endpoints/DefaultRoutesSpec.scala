@@ -5,6 +5,8 @@ import zio.*
 import zio.http.{Method, Request}
 import zio.test.*
 
+import java.nio.charset.Charset
+
 object DefaultRoutesSpec extends ZIOSpecDefault with Generators {
 
   override def spec: Spec[TestEnvironment & Scope, Any] =
@@ -20,8 +22,10 @@ object DefaultRoutesSpec extends ZIOSpecDefault with Generators {
             response <- defaultRoute.routes(request)
             loggerChunk <- ZTestLogger.logOutput
             logMessages = loggerChunk.map(_.message()).toSet
+            resBody <- response.body.asArray
           } yield assertTrue(
             response.status == zio.http.Status.NotImplemented,
+            resBody sameElements "Incorrect endpoint".getBytes,
             logMessages == Set("Http request served")
           ))
             .provide(

@@ -19,8 +19,10 @@ object HealthRoutesSpec extends ZIOSpecDefault with Generators {
           response <- healthRoutes.routes(request)
           loggerChunk <- ZTestLogger.logOutput
           logMessages = loggerChunk.map(_.message())
+          resBody <- response.body.asArray
         } yield assertTrue(
           response.status == zio.http.Status.Ok,
+          resBody sameElements "Hello World".getBytes,
           logMessages.toSet == Set(
             "Http request served"
           )
